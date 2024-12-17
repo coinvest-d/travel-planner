@@ -1,135 +1,449 @@
-function generateItinerary(city1, city2, startDate, days) {
-    const planResult = document.getElementById('planResult');
-    const date = new Date(startDate);
-    let html = '<div class="itinerary-container">';
-    
-    const cityGuides = {
-        'guangzhou': {
-            'attractions': [
-                {
-                    'morning': {
-                        'spot': '沙面',
-                        'time': '09:00-12:00',
-                        'activities': [
-                            '09:00 到达沙面（地铁6号线沙面站B出口）',
-                            '09:15-10:30 游览沙面建筑群',
-                            '10:30-11:30 沙面大街拍照',
-                            '11:30-12:00 品尝沙面特色茶点'
-                        ]
-                    },
-                    'afternoon': {
-                        'spot': '陈家祠',
-                        'time': '14:00-17:00',
-                        'transport': '乘坐地铁6号线至黄沙站，转乘地铁1号线至陈家祠站A出口，约40分钟',
-                        'activities': [
-                            '14:00 到达陈家祠',
-                            '14:15-16:00 参观陈家祠建筑群',
-                            '16:00-17:00 欣赏岭南建筑艺术'
-                        ]
-                    }
-                },
-                {
-                    'morning': {
-                        'spot': '白云山',
-                        'time': '08:30-12:00',
-                        'transport': '乘坐地铁2号线至白云山站A出口，约30分钟',
-                        'activities': [
-                            '08:30 到达白云山南门',
-                            '09:00-10:30 登山游览',
-                            '10:30-11:30 参观摩星岭',
-                            '11:30-12:00 白云山观景台拍照'
-                        ]
-                    },
-                    'afternoon': {
-                        'spot': '广州塔',
-                        'time': '15:00-18:00',
-                        'transport': '乘坐地铁3号线至广州塔站，约45分钟',
-                        'activities': [
-                            '15:00 到达广州塔',
-                            '15:30-16:30 登塔观光',
-                            '16:30-17:30 空中旋转餐厅用餐',
-                            '17:30-18:00 观赏夜景'
-                        ]
-                    }
-                }
-            ]
-        },
-        'shenzhen': {
-            'attractions': [
-                {
-                    'morning': {
-                        'spot': '世界之窗',
-                        'time': '09:30-13:00',
-                        'transport': '地铁1号线至世界之窗站D出口，约25分钟',
-                        'activities': [
-                            '09:30 到达世界之窗',
-                            '10:00-11:30 游览欧洲区和亚洲区',
-                            '11:30-13:00 参观美洲区和非洲区'
-                        ]
-                    },
-                    'afternoon': {
-                        'spot': '深圳湾公园',
-                        'time': '15:00-18:00',
-                        'transport': '乘坐地铁2号线至深圳湾站，约35分钟',
-                        'activities': [
-                            '15:00 到达深圳湾公园',
-                            '15:30-16:30 海滨栈道漫步',
-                            '16:30-17:30 红树林生态区观光',
-                            '17:30-18:00 观赏日落'
-                        ]
-                    }
-                }
-            ]
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>智能旅行助手</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
         }
-    };
+        
+        .nav {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 80px auto 20px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 12px;
+            height: fit-content;
+        }
+        
+        .content {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .login-form {
+            display: none;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        button {
+            background: #2997ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #147ce5;
+            transform: scale(1.02);
+        }
+        
+        .itinerary-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .day-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .city-tag {
+            background: #2997ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .time-block {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .time-block h4 {
+            color: #2997ff;
+            margin-bottom: 16px;
+        }
+        
+        .activities p {
+            margin: 8px 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .transport-info {
+            padding: 12px;
+            background: rgba(41, 151, 255, 0.1);
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+        
+        .transport-info p {
+            color: #2997ff;
+            margin: 0;
+        }
+        
+        .plan-note {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0, 40, 83, 1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(49, 18, 89, 1) 0%, transparent 50%);
+            z-index: -1;
+        }
+    </style>
+</head>
 
-    // 生成HTML
-    html += `<div class="day-plan">
-        <h2>详细行程安排</h2>
-        <p class="plan-note">* 以下行程仅供参考，可根据实际情况调整</p>
-    `;
 
-    for (let i = 0; i < days; i++) {
-        const currentDate = new Date(date);
-        currentDate.setDate(date.getDate() + i);
-        const currentCity = i < days/2 ? city1 : city2;
-        const cityData = cityGuides[currentCity];
-        const dayPlan = cityData.attractions[i % cityData.attractions.length];
+    <body>
+    <div class="gradient-bg"></div>
+    <nav class="nav">
+        <div class="nav-container">
+            <h1>智能旅行助手</h1>
+            <div class="nav-links">
+                <a href="#" onclick="showLogin()">登录</a>
+                <a href="#" onclick="showRegister()">注册</a>
+                <a href="#" onclick="showMyTrips()">我的行程</a>
+            </div>
+        </div>
+    </nav>
 
-        html += `
-            <div class="day-card">
-                <div class="day-header">
-                    <h3>第${i+1}天 ${currentDate.toLocaleDateString('zh-CN')}</h3>
-                    <span class="city-tag">${currentCity.toUpperCase()}</span>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="login-form" id="loginForm">
+                <h3>登录</h3>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="loginEmail">
                 </div>
-                
-                <div class="time-block morning">
-                    <h4>${dayPlan.morning.time} · ${dayPlan.morning.spot}</h4>
-                    <div class="activities">
-                        ${dayPlan.morning.activities.map(activity => 
-                            `<p>🕒 ${activity}</p>`
-                        ).join('')}
-                    </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword">
                 </div>
+                <button onclick="login()">登录</button>
+            </div>
 
-                <div class="transport-info">
-                    <p>🚇 ${dayPlan.afternoon.transport}</p>
+            <div class="city-selector">
+                <h3>选择城市</h3>
+                <div class="form-group">
+                    <label>出发城市</label>
+                    <select id="city1">
+                        <option value="guangzhou">广州</option>
+                        <option value="shenzhen">深圳</option>
+                        <option value="beijing">北京</option>
+                        <option value="shanghai">上海</option>
+                    </select>
                 </div>
-
-                <div class="time-block afternoon">
-                    <h4>${dayPlan.afternoon.time} · ${dayPlan.afternoon.spot}</h4>
-                    <div class="activities">
-                        ${dayPlan.afternoon.activities.map(activity => 
-                            `<p>🕒 ${activity}</p>`
-                        ).join('')}
-                    </div>
+                <div class="form-group">
+                    <label>目的城市</label>
+                    <select id="city2">
+                        <option value="shenzhen">深圳</option>
+                        <option value="guangzhou">广州</option>
+                        <option value="beijing">北京</option>
+                        <option value="shanghai">上海</option>
+                    </select>
                 </div>
             </div>
-        `;
-    }
 
-    html += '</div></div>';
-    planResult.innerHTML = html;
-}
+            <div class="date-selector">
+                <h3>选择日期</h3>
+                <div class="form-group">
+                    <label>开始日期</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label>天数</label>
+                    <input type="number" id="days" min="1" max="30" value="7">
+                </div>
+            </div>
 
+            <button onclick="generatePlan()">生成行程</button>
+        </div>
 
+        <div class="content">
+            <div class="weather-info" id="weatherInfo">
+                <!-- 天气信息 -->
+            </div>
+
+            <div class="plan-result" id="planResult">
+                <!-- 行程信息 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 城市数据
+        const cityData = {
+            'guangzhou': {
+                attractions: [
+                    {
+                        morning: {
+                            spot: '沙面',
+                            time: '09:00-12:00',
+                            transport: '地铁6号线沙面站B出口',
+                            activities: [
+                                '09:00 到达沙面',
+                                '09:15-10:30 游览沙面建筑群，欣赏欧式风情建筑',
+                                '10:30-11:30 沙面大街拍照，体验异国风情',
+                                '11:30-12:00 品尝沙面特色茶点'
+                            ]
+                        },
+                        afternoon: {
+                            spot: '陈家祠',
+                            time: '14:00-17:00',
+                            transport: '乘坐地铁6号线至黄沙站，转乘地铁1号线至陈家祠站A出口，约40分钟',
+                            activities: [
+                                '14:00 到达陈家祠',
+                                '14:15-15:30 参观陈家祠建筑群，了解岭南建筑特色',
+                                '15:30-16:30 欣赏精美的木雕艺术',
+                                '16:30-17:00 参观岭南文化展览'
+                            ]
+                        }
+                    },
+                    {
+                        morning: {
+                            spot: '白云山',
+                            time: '08:30-12:00',
+                            transport: '地铁2号线至白云山站A出口，步行10分钟',
+                            activities: [
+                                '08:30 到达白云山南门',
+                                '09:00-10:30 登山游览，欣赏自然风光',
+                                '10:30-11:30 参观摩星岭，远眺广州城市全景',
+                                '11:30-12:00 品尝白云山特色茶点'
+                            ]
+                        },
+                        afternoon: {
+                            spot: '广州塔',
+                            time: '15:00-18:00',
+                            transport: '乘坐地铁3号线至广州塔站，约45分钟',
+                            activities: [
+                                '15:00 到达广州塔',
+                                '15:30-16:30 登塔观光，体验高空观景',
+                                '16:30-17:30 体验旋转餐厅，品尝下午茶',
+                                '17:30-18:00 观赏广州日落'
+                            ]
+                        }
+                    }
+                ]
+            },
+            'shenzhen': {
+                attractions: [
+                    {
+                        morning: {
+                            spot: '世界之窗',
+                            time: '09:30-13:00',
+                            transport: '地铁1号线至世界之窗站D出口',
+                            activities: [
+                                '09:30 到达世界之窗',
+                                '10:00-11:30 游览欧洲区和亚洲区景点',
+                                '11:30-12:30 观看特色表演',
+                                '12:30-13:00 品尝世界美食'
+                            ]
+                        },
+                        afternoon: {
+                            spot: '深圳湾公园',
+                            time: '15:00-18:00',
+                            transport: '乘坐地铁2号线至深圳湾站，步行10分钟',
+                            activities: [
+                                '15:00 到达深圳湾公园',
+                                '15:30-16:30 漫步海滨栈道',
+                                '16:30-17:30 参观红树林生态区',
+                                '17:30-18:00 欣赏日落美景'
+                            ]
+                        }
+                    }
+                ]
+            }
+        };
+
+        // 生成行程函数
+        function generateItinerary(city1, city2, startDate, days) {
+            const planResult = document.getElementById('planResult');
+            const date = new Date(startDate);
+            let html = '<div class="itinerary-container">';
+            
+            html += `
+                <div class="day-plan">
+                    <h2>详细行程安排</h2>
+                    <p class="plan-note">* 以下行程仅供参考，可根据实际情况调整</p>
+            `;
+
+            for (let i = 0; i < days; i++) {
+                const currentDate = new Date(date);
+                currentDate.setDate(date.getDate() + i);
+                const currentCity = i < days/2 ? city1 : city2;
+                const cityAttractions = cityData[currentCity].attractions;
+                const dayPlan = cityAttractions[i % cityAttractions.length];
+
+                html += `
+                    <div class="day-card">
+                        <div class="day-header">
+                            <h3>第${i+1}天 ${currentDate.toLocaleDateString('zh-CN')}</h3>
+                            <span class="city-tag">${currentCity.toUpperCase()}</span>
+                        </div>
+                        
+                        <div class="time-block morning">
+                            <h4>${dayPlan.morning.time} · ${dayPlan.morning.spot}</h4>
+                            <div class="transport-info">
+                                <p>🚇 交通方式：${dayPlan.morning.transport}</p>
+                            </div>
+                            <div class="activities">
+                                ${dayPlan.morning.activities.map(activity => 
+                                    `<p>🕒 ${activity}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+
+                        <div class="time-block afternoon">
+                            <h4>${dayPlan.afternoon.time} · ${dayPlan.afternoon.spot}</h4>
+                            <div class="transport-info">
+                                <p>🚇 交通方式：${dayPlan.afternoon.transport}</p>
+                            </div>
+                            <div class="activities">
+                                ${dayPlan.afternoon.activities.map(activity => 
+                                    `<p>🕒 ${activity}</p>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div></div>';
+            planResult.innerHTML = html;
+        }
+
+        // 其他功能函数
+        let currentUser = null;
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 
+                document.getElementById('loginForm').style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            currentUser = { email: email };
+            alert('登录成功！');
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        async function generatePlan() {
+            const city1 = document.getElementById('city1').value;
+            const city2 = document.getElementById('city2').value;
+            const startDate = document.getElementById('startDate').value;
+            const days = document.getElementById('days').value;
+
+            if (!startDate) {
+                alert('请选择开始日期！');
+                return;
+            }
+
+            generateItinerary(city1, city2, startDate, days);
+        }
+
+        // 设置日期选择器的最小值为今天
+        document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>
