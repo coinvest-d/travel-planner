@@ -1,379 +1,135 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>智能旅行助手</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f0f0f0;
-            color: #333;
+function generateItinerary(city1, city2, startDate, days) {
+    const planResult = document.getElementById('planResult');
+    const date = new Date(startDate);
+    let html = '<div class="itinerary-container">';
+    
+    const cityGuides = {
+        'guangzhou': {
+            'attractions': [
+                {
+                    'morning': {
+                        'spot': '沙面',
+                        'time': '09:00-12:00',
+                        'activities': [
+                            '09:00 到达沙面（地铁6号线沙面站B出口）',
+                            '09:15-10:30 游览沙面建筑群',
+                            '10:30-11:30 沙面大街拍照',
+                            '11:30-12:00 品尝沙面特色茶点'
+                        ]
+                    },
+                    'afternoon': {
+                        'spot': '陈家祠',
+                        'time': '14:00-17:00',
+                        'transport': '乘坐地铁6号线至黄沙站，转乘地铁1号线至陈家祠站A出口，约40分钟',
+                        'activities': [
+                            '14:00 到达陈家祠',
+                            '14:15-16:00 参观陈家祠建筑群',
+                            '16:00-17:00 欣赏岭南建筑艺术'
+                        ]
+                    }
+                },
+                {
+                    'morning': {
+                        'spot': '白云山',
+                        'time': '08:30-12:00',
+                        'transport': '乘坐地铁2号线至白云山站A出口，约30分钟',
+                        'activities': [
+                            '08:30 到达白云山南门',
+                            '09:00-10:30 登山游览',
+                            '10:30-11:30 参观摩星岭',
+                            '11:30-12:00 白云山观景台拍照'
+                        ]
+                    },
+                    'afternoon': {
+                        'spot': '广州塔',
+                        'time': '15:00-18:00',
+                        'transport': '乘坐地铁3号线至广州塔站，约45分钟',
+                        'activities': [
+                            '15:00 到达广州塔',
+                            '15:30-16:30 登塔观光',
+                            '16:30-17:30 空中旋转餐厅用餐',
+                            '17:30-18:00 观赏夜景'
+                        ]
+                    }
+                }
+            ]
+        },
+        'shenzhen': {
+            'attractions': [
+                {
+                    'morning': {
+                        'spot': '世界之窗',
+                        'time': '09:30-13:00',
+                        'transport': '地铁1号线至世界之窗站D出口，约25分钟',
+                        'activities': [
+                            '09:30 到达世界之窗',
+                            '10:00-11:30 游览欧洲区和亚洲区',
+                            '11:30-13:00 参观美洲区和非洲区'
+                        ]
+                    },
+                    'afternoon': {
+                        'spot': '深圳湾公园',
+                        'time': '15:00-18:00',
+                        'transport': '乘坐地铁2号线至深圳湾站，约35分钟',
+                        'activities': [
+                            '15:00 到达深圳湾公园',
+                            '15:30-16:30 海滨栈道漫步',
+                            '16:30-17:30 红树林生态区观光',
+                            '17:30-18:00 观赏日落'
+                        ]
+                    }
+                }
+            ]
         }
-        
-        .nav {
-            background: #007AFF;
-            color: white;
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .main-container {
-            max-width: 1200px;
-            margin: 80px auto 20px;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-        }
-        
-        .sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .content {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .login-form {
-            display: none;
-            padding: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        button {
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        button:hover {
-            background: #0056b3;
-        }
-        
-        .weather-info, .plan-result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .booking-section {
-            margin-top: 20px;
-            padding: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .hotel-list, .ticket-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .hotel-card, .ticket-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            background: white;
-        }
-    </style>
-</head>
-<body>
-    <nav class="nav">
-        <div class="nav-container">
-            <h1>智能旅行助手</h1>
-            <div class="nav-links">
-                <a href="#" onclick="showLogin()">登录</a>
-                <a href="#" onclick="showRegister()">注册</a>
-                <a href="#" onclick="showMyTrips()">我的行程</a>
-            </div>
-        </div>
-    </nav>
+    };
 
-    <div class="main-container">
-        <div class="sidebar">
-            <div class="login-form" id="loginForm">
-                <h3>登录</h3>
-                <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="loginEmail">
+    // 生成HTML
+    html += `<div class="day-plan">
+        <h2>详细行程安排</h2>
+        <p class="plan-note">* 以下行程仅供参考，可根据实际情况调整</p>
+    `;
+
+    for (let i = 0; i < days; i++) {
+        const currentDate = new Date(date);
+        currentDate.setDate(date.getDate() + i);
+        const currentCity = i < days/2 ? city1 : city2;
+        const cityData = cityGuides[currentCity];
+        const dayPlan = cityData.attractions[i % cityData.attractions.length];
+
+        html += `
+            <div class="day-card">
+                <div class="day-header">
+                    <h3>第${i+1}天 ${currentDate.toLocaleDateString('zh-CN')}</h3>
+                    <span class="city-tag">${currentCity.toUpperCase()}</span>
                 </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" id="loginPassword">
-                </div>
-                <button onclick="login()">登录</button>
-            </div>
-
-            <div class="city-selector">
-                <h3>选择城市</h3>
-                <div class="form-group">
-                    <label>出发城市</label>
-                    <select id="city1">
-                        <option value="beijing">北京</option>
-                        <option value="shanghai">上海</option>
-                        <option value="guangzhou">广州</option>
-                        <option value="shenzhen">深圳</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>目的城市</label>
-                    <select id="city2">
-                        <option value="beijing">北京</option>
-                        <option value="shanghai">上海</option>
-                        <option value="guangzhou">广州</option>
-                        <option value="shenzhen">深圳</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="date-selector">
-                <h3>选择日期</h3>
-                <div class="form-group">
-                    <label>开始日期</label>
-                    <input type="date" id="startDate">
-                </div>
-                <div class="form-group">
-                    <label>天数</label>
-                    <input type="number" id="days" min="1" max="30" value="7">
-                </div>
-            </div>
-
-            <button onclick="generatePlan()">生成行程</button>
-        </div>
-
-        <div class="content">
-            <div class="weather-info" id="weatherInfo">
-                <!-- 天气信息 -->
-            </div>
-
-            <div class="plan-result" id="planResult">
-                <!-- 行程信息 -->
-            </div>
-
-            <div class="booking-section" id="bookingSection">
-                <h3>酒店预订</h3>
-                <div class="hotel-list" id="hotelList">
-                    <!-- 酒店列表 -->
-                </div>
-
-                <h3>景点门票</h3>
-                <div class="ticket-list" id="ticketList">
-                    <!-- 门票列表 -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 用户相关功能
-        let currentUser = null;
-
-        function showLogin() {
-            document.getElementById('loginForm').style.display = 
-                document.getElementById('loginForm').style.display === 'none' ? 'block' : 'none';
-        }
-
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            // 这里添加实际的登录逻辑
-            currentUser = { email: email };
-            alert('登录成功！');
-            document.getElementById('loginForm').style.display = 'none';
-        }
-
-        // 生成行程
-        async function generatePlan() {
-            const city1 = document.getElementById('city1').value;
-            const city2 = document.getElementById('city2').value;
-            const startDate = document.getElementById('startDate').value;
-            const days = document.getElementById('days').value;
-
-            if (!startDate) {
-                alert('请选择开始日期！');
-                return;
-            }
-
-            await fetchWeather(city1, city2);
-            generateItinerary(city1, city2, startDate, days);
-            searchHotels(city2);
-            searchTickets(city2);
-        }
-
-        // 天气API
-        async function fetchWeather(city1, city2) {
-            const weatherInfo = document.getElementById('weatherInfo');
-            weatherInfo.innerHTML = `
-                <h3>天气预报</h3>
-                <p>${city1}: 晴朗 26°C</p>
-                <p>${city2}: 多云 24°C</p>
-            `;
-        }
-
-        function generateItinerary(city1, city2, startDate, days) {
-            const planResult = document.getElementById('planResult');
-            const date = new Date(startDate);
-            let html = '<h3>推荐行程</h3>';
-            
-            const attractions = {
-                'beijing': ['故宫博物院', '长城', '天安门广场', '颐和园', '南锣鼓巷', '后海'],
-                'shanghai': ['外滩', '南京路', '迪士尼乐园', '豫园', '田子坊', '东方明珠'],
-                'guangzhou': ['沙面', '陈家祠', '白云山', '广州塔', '上下九步行街'],
-                'shenzhen': ['世界之窗', '东门步行街', '深圳湾公园', '欢乐谷', '大梅沙']
-            };
-
-            for (let i = 0; i < days; i++) {
-                const currentDate = new Date(date);
-                currentDate.setDate(date.getDate() + i);
-                const cityAttractions = i < days/2 ? attractions[city1] : attractions[city2];
-                const city = i < days/2 ? city1 : city2;
                 
-                html += `
-                    <h4>第${i+1}天 (${currentDate.toLocaleDateString('zh-CN')}) - ${city}</h4>
-                    <ul>
-                        <li>上午: ${cityAttractions[i % cityAttractions.length]}</li>
-                        <li>下午: ${cityAttractions[(i+1) % cityAttractions.length]}</li>
-                    </ul>
-                `;
-            }
-            
-            planResult.innerHTML = html;
-        }
-
-        // 酒店搜索
-        async function searchHotels(city) {
-            const hotels = {
-                'beijing': [
-                    { name: '北京希尔顿酒店', price: 888 },
-                    { name: '北京丽思卡尔顿酒店', price: 1288 }
-                ],
-                'shanghai': [
-                    { name: '上海和平饭店', price: 968 },
-                    { name: '上海外滩茂悦大酒店', price: 1168 }
-                ],
-                'guangzhou': [
-                    { name: '广州白天鹅宾馆', price: 798 },
-                    { name: '广州文华东方酒店', price: 1088 }
-                ],
-                'shenzhen': [
-                    { name: '深圳丽思卡尔顿酒店', price: 1088 },
-                    { name: '深圳四季酒店', price: 1288 }
-                ]
-            };
-
-            const hotelList = document.getElementById('hotelList');
-            hotelList.innerHTML = hotels[city].map(hotel => `
-                <div class="hotel-card">
-                    <h4>${hotel.name}</h4>
-                    <p>价格: ¥${hotel.price}/晚</p>
-                    <button onclick="bookHotel('${hotel.name}')">预订</button>
+                <div class="time-block morning">
+                    <h4>${dayPlan.morning.time} · ${dayPlan.morning.spot}</h4>
+                    <div class="activities">
+                        ${dayPlan.morning.activities.map(activity => 
+                            `<p>🕒 ${activity}</p>`
+                        ).join('')}
+                    </div>
                 </div>
-            `).join('');
-        }
 
-        // 门票搜索
-        async function searchTickets(city) {
-            const tickets = {
-                'beijing': [
-                    { name: '故宫博物院', price: 60 },
-                    { name: '八达岭长城', price: 80 }
-                ],
-                'shanghai': [
-                    { name: '迪士尼乐园', price: 399 },
-                    { name: '东方明珠', price: 160 }
-                ],
-                'guangzhou': [
-                    { name: '广州塔', price: 150 },
-                    { name: '长隆野生动物世界', price: 250 }
-                ],
-                'shenzhen': [
-                    { name: '世界之窗', price: 180 },
-                    { name: '欢乐谷', price: 220 }
-                ]
-            };
-
-            const ticketList = document.getElementById('ticketList');
-            ticketList.innerHTML = tickets[city].map(ticket => `
-                <div class="ticket-card">
-                    <h4>${ticket.name}</h4>
-                    <p>价格: ¥${ticket.price}/人</p>
-                    <button onclick="bookTicket('${ticket.name}')">预订</button>
+                <div class="transport-info">
+                    <p>🚇 ${dayPlan.afternoon.transport}</p>
                 </div>
-            `).join('');
-        }
 
-        // 预订功能
-        function bookHotel(hotelName) {
-            if (!currentUser) {
-                alert('请先登录！');
-                return;
-            }
-            alert(`${hotelName} 预订成功！`);
-        }
+                <div class="time-block afternoon">
+                    <h4>${dayPlan.afternoon.time} · ${dayPlan.afternoon.spot}</h4>
+                    <div class="activities">
+                        ${dayPlan.afternoon.activities.map(activity => 
+                            `<p>🕒 ${activity}</p>`
+                        ).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
-        function bookTicket(ticketName) {
-            if (!currentUser) {
-                alert('请先登录！');
-                return;
-            }
-            alert(`${ticketName} 门票预订成功！`);
-        }
+    html += '</div></div>';
+    planResult.innerHTML = html;
+}
 
-        // 设置日期选择器的最小值为今天
-        document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
-    </script>
-</body>
-</html>
+
